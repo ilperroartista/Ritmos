@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Registro Diario</title>
+  <style>
+    /* ─── Variables ─────────────────────────────────────────── */
+    :root {
+      --bg:          #F5F4F2;
+      --surface:     #FFFFFF;
+      --border:      #E2E0DC;
+      --text:        #1A1A1A;
+      --text-muted:  #6B6B6B;
+      --accent:      #4A5568;
+      --accent-soft: #EDF0F4;
+      --warn:        #C0392B;
+      --warn-soft:   #FDF2F0;
+      --radius:      12px;
+      --shadow:      0 1px 3px rgba(0,0,0,.06), 0 1px 8px rgba(0,0,0,.04);
+    }
+
+    /* ─── Reset & base ──────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { -webkit-text-size-adjust: 100%; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
+    }
+
+    /* ─── Layout ────────────────────────────────────────────── */
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 32px 20px 48px;
+    }
+
+    /* ─── Header ────────────────────────────────────────────── */
+    header {
+      margin-bottom: 36px;
+    }
+
+    .app-title {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .date-label {
+      font-size: 22px;
+      font-weight: 300;
+      color: var(--text);
+      margin-top: 4px;
+      letter-spacing: -0.02em;
+    }
+
+    /* ─── Card ──────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 24px 20px;
+      margin-bottom: 16px;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    /* ─── Water section ─────────────────────────────────────── */
+    .water-stat {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+
+    .water-ml {
+      font-size: 48px;
+      font-weight: 200;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .water-unit {
+      font-size: 15px;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .water-glasses {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    .water-glasses strong {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* ─── Progress bar ──────────────────────────────────────── */
+    .progress-track {
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+      transition: width 0.4s cubic-bezier(.4,0,.2,1);
+      width: 0%;
+    }
+
+    /* ─── Buttons ───────────────────────────────────────────── */
+    .btn-primary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      min-height: 52px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: opacity 0.12s ease, transform 0.12s ease;
+    }
+
+    .btn-primary:active {
+      opacity: 0.82;
+      transform: scale(0.98);
+    }
+
+    .btn-secondary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      min-height: 52px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: opacity 0.12s ease, transform 0.12s ease;
+    }
+
+    .btn-secondary:active {
+      opacity: 0.75;
+      transform: scale(0.98);
+    }
+
+    /* ─── Reset button ──────────────────────────────────────── */
+    .btn-reset {
+      display: block;
+      width: 100%;
+      background: none;
+      border: none;
+      font-family: inherit;
+      font-size: 13px;
+      color: var(--text-muted);
+      text-align: center;
+      cursor: pointer;
+      padding: 12px 0 0;
+      letter-spacing: 0.01em;
+      -webkit-tap-highlight-color: transparent;
+      transition: color 0.1s;
+    }
+
+    .btn-reset:active { color: var(--warn); }
+
+    /* ─── Divider ───────────────────────────────────────────── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 8px 0 16px;
+    }
+
+    /* ─── Meals section ─────────────────────────────────────── */
+    .meals-list {
+      list-style: none;
+      margin-top: 16px;
+      max-height: 320px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .meals-list::-webkit-scrollbar { display: none; }
+
+    .meal-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .meal-item:last-child { border-bottom: none; }
+
+    .meal-num {
+      min-width: 24px;
+      height: 24px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+      flex-shrink: 0;
+    }
+
+    .meal-info {
+      flex: 1;
+    }
+
+    .meal-time {
+      font-size: 16px;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+      color: var(--text);
+    }
+
+    .meal-delta {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .meal-delta.warn {
+      color: var(--warn);
+    }
+
+    .meal-item.warn-item {
+      background: var(--warn-soft);
+      margin: 0 -20px;
+      padding: 12px 20px;
+      border-radius: 8px;
+    }
+
+    /* ─── Empty state ───────────────────────────────────────── */
+    .empty-state {
+      text-align: center;
+      padding: 24px 0 8px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* ─── Tap feedback flash ─────────────────────────────────── */
+    @keyframes flash {
+      0%   { opacity: 1; }
+      50%  { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+    .flash { animation: flash 0.25s ease; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <header>
+    <p class="app-title">Registro Diario</p>
+    <p class="date-label" id="dateLabel">—</p>
+  </header>
+
+  <!-- ── Agua ─────────────────────────────────────────────── -->
+  <div class="card">
+    <p class="section-label">Hidratación</p>
+
+    <div class="water-stat">
+      <span class="water-ml" id="waterMl">0</span>
+      <span class="water-unit">ml</span>
+    </div>
+
+    <p class="water-glasses" id="waterGlasses">
+      <strong>0</strong> vasos de 250 ml
+    </p>
+
+    <!-- Barra de progreso hacia meta de 2000 ml -->
+    <div class="progress-track" title="Meta: 2000 ml">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <button class="btn-primary" id="btnWater" onclick="addWater()">
+      💧 Vaso de agua (+250 ml)
+    </button>
+  </div>
+
+  <!-- ── Ingestas ───────────────────────────────────────────── -->
+  <div class="card">
+    <p class="section-label">Ingestas del día</p>
+
+    <button class="btn-secondary" id="btnMeal" onclick="addMeal()">
+      🍽 Registrar ingesta
+    </button>
+
+    <ul class="meals-list" id="mealsList"></ul>
+  </div>
+
+  <!-- Reiniciar día -->
+  <button class="btn-reset" onclick="resetDay()">↺ Reiniciar día</button>
+
+</div>
+
+<script>
+  /* ─── Utilidades ─────────────────────────────────────────── */
+
+  /** Devuelve la fecha actual en formato "YYYY-MM-DD" */
+  function todayStr() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  /** Devuelve la hora actual en formato "HH:MM" */
+  function nowTime() {
+    const d = new Date();
+    return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  }
+
+  /** Convierte un timestamp (ms) a "HH:MM" */
+  function tsToTime(ts) {
+    const d = new Date(ts);
+    return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  }
+
+  /** Etiqueta de fecha legible en español */
+  function formatDateLabel(str) {
+    const [y, m, d] = str.split('-').map(Number);
+    const date = new Date(y, m-1, d);
+    return date.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' });
+  }
+
+  /** Calcula delta entre dos timestamps y devuelve objeto {label, warn} */
+  function calcDelta(prevTs, currTs) {
+    const diffMs  = currTs - prevTs;
+    const diffMin = Math.round(diffMs / 60000);
+    const hrs     = Math.floor(diffMin / 60);
+    const mins    = diffMin % 60;
+    const warn    = diffMin < 180; // menos de 3 horas
+
+    let label;
+    if (hrs > 0) {
+      label = `Δ ${hrs}h${mins > 0 ? ` ${mins}m` : ''}`;
+    } else {
+      label = `Δ ${mins}m`;
+    }
+    return { label, warn };
+  }
+
+  /* ─── Estado ─────────────────────────────────────────────── */
+  let waterTotal = 0;   // ml totales del día
+  let meals      = [];  // array de { ts: Number, num: Number }
+
+  /* ─── Carga inicial ──────────────────────────────────────── */
+  function loadData() {
+    const today      = todayStr();
+    const savedDate  = localStorage.getItem('waterDate');
+
+    if (savedDate === today) {
+      // Mismo día: restaurar valores guardados
+      waterTotal = parseInt(localStorage.getItem('waterTotal') || '0', 10);
+      try {
+        meals = JSON.parse(localStorage.getItem('meals') || '[]');
+      } catch { meals = []; }
+    } else {
+      // Nuevo día: resetear y guardar nueva fecha
+      waterTotal = 0;
+      meals      = [];
+      localStorage.setItem('waterTotal', '0');
+      localStorage.setItem('meals',      '[]');
+      localStorage.setItem('waterDate',  today);
+    }
+  }
+
+  /* ─── Persistencia ───────────────────────────────────────── */
+  function saveData() {
+    localStorage.setItem('waterTotal', String(waterTotal));
+    localStorage.setItem('meals',      JSON.stringify(meals));
+    localStorage.setItem('waterDate',  todayStr());
+  }
+
+  /* ─── Render agua ────────────────────────────────────────── */
+  function renderWater() {
+    const ml     = waterTotal;
+    const vasos  = Math.floor(ml / 250);
+    const pct    = Math.min(100, Math.round((ml / 2000) * 100));
+
+    document.getElementById('waterMl').textContent     = ml;
+    document.getElementById('waterGlasses').innerHTML  = `<strong>${vasos}</strong> vaso${vasos !== 1 ? 's' : ''} de 250 ml`;
+    document.getElementById('progressFill').style.width = `${pct}%`;
+  }
+
+  /* ─── Render ingestas ────────────────────────────────────── */
+  function renderMeals() {
+    const list = document.getElementById('mealsList');
+    list.innerHTML = '';
+
+    if (meals.length === 0) {
+      list.innerHTML = '<li class="empty-state">Sin ingestas registradas</li>';
+      return;
+    }
+
+    meals.forEach((meal, idx) => {
+      const li      = document.createElement('li');
+      const isWarn  = idx > 0 && calcDelta(meals[idx-1].ts, meal.ts).warn;
+      li.className  = `meal-item${isWarn ? ' warn-item' : ''}`;
+
+      let deltaHtml = '<span class="meal-delta">—</span>';
+      if (idx > 0) {
+        const { label, warn } = calcDelta(meals[idx-1].ts, meal.ts);
+        deltaHtml = `<span class="meal-delta${warn ? ' warn' : ''}">${warn ? '⚠️ ' : ''}${label}</span>`;
+      }
+
+      li.innerHTML = `
+        <div class="meal-num">${meal.num}</div>
+        <div class="meal-info">
+          <div class="meal-time">Ingesta ${meal.num} – ${tsToTime(meal.ts)}</div>
+          ${deltaHtml}
+        </div>`;
+
+      list.appendChild(li);
+    });
+  }
+
+  /* ─── Render fecha ───────────────────────────────────────── */
+  function renderDate() {
+    document.getElementById('dateLabel').textContent = formatDateLabel(todayStr());
+  }
+
+  /* ─── Acciones ───────────────────────────────────────────── */
+
+  /** Agregar un vaso de agua */
+  function addWater() {
+    waterTotal += 250;
+    saveData();
+    renderWater();
+
+    // Feedback visual
+    const btn = document.getElementById('btnWater');
+    btn.classList.remove('flash');
+    void btn.offsetWidth; // reflow para reiniciar animación
+    btn.classList.add('flash');
+  }
+
+  /** Registrar una nueva ingesta */
+  function addMeal() {
+    const num  = meals.length + 1;
+    const ts   = Date.now();
+    meals.push({ ts, num });
+    saveData();
+    renderMeals();
+
+    // Feedback visual
+    const btn = document.getElementById('btnMeal');
+    btn.classList.remove('flash');
+    void btn.offsetWidth;
+    btn.classList.add('flash');
+
+    // Scroll al final de la lista
+    const list = document.getElementById('mealsList');
+    list.scrollTop = list.scrollHeight;
+  }
+
+  /** Reiniciar el día (con confirmación) */
+  function resetDay() {
+    if (!confirm('¿Reiniciar el día? Se borrarán el agua y todas las ingestas.')) return;
+    waterTotal = 0;
+    meals      = [];
+    saveData();
+    renderWater();
+    renderMeals();
+  }
+
+  /* ─── Inicializar ────────────────────────────────────────── */
+  loadData();
+  renderDate();
+  renderWater();
+  renderMeals();
+</script>
+</body>
+</html>
