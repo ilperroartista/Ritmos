@@ -210,10 +210,33 @@
       margin: 8px 0 16px;
     }
 
+    /* ─── Live timer block ──────────────────────────────────── */
+    .live-timer-block {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+
+    .live-timer-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    #liveTimer {
+      font-size: 15px;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-muted);
+      transition: color 0.3s ease;
+    }
+
     /* ─── Meals section ─────────────────────────────────────── */
     .meals-list {
       list-style: none;
-      margin-top: 16px;
       max-height: 320px;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
@@ -332,6 +355,14 @@
       🍽 Registrar ingesta
     </button>
 
+    <!-- ── Temporizador MMC en vivo ── -->
+    <div class="live-timer-block">
+      <span class="live-timer-label">MMC actual</span>
+      <p id="liveTimer">—</p>
+    </div>
+
+    <div class="divider"></div>
+
     <ul class="meals-list" id="mealsList"></ul>
   </div>
 
@@ -388,6 +419,48 @@
   /* ─── Estado ─────────────────────────────────────────────── */
   let waterTotal = 0;   // ml totales del día
   let meals      = [];  // array de { ts: Number, num: Number }
+  let timerInterval = null; // referencia al intervalo del temporizador en vivo
+
+  /* ─── Temporizador MMC en vivo ───────────────────────────── */
+
+  /** Calcula y renderiza el tiempo transcurrido desde la última ingesta */
+  function updateLiveTimer() {
+    const el = document.getElementById('liveTimer');
+
+    if (meals.length === 0) {
+      el.textContent = '—';
+      el.style.color = 'var(--text-muted)';
+      return;
+    }
+
+    const lastTs   = meals[meals.length - 1].ts;
+    const diffMs   = Date.now() - lastTs;
+    const diffMin  = Math.floor(diffMs / 60000);
+    const hrs      = Math.floor(diffMin / 60);
+    const mins     = diffMin % 60;
+
+    let text;
+    if (diffMin === 0) {
+      text = 'Ahora';
+    } else if (hrs > 0) {
+      text = mins > 0 ? `${hrs}h ${mins}m` : `${hrs}h`;
+    } else {
+      text = `${mins}m`;
+    }
+
+    el.textContent = text;
+    // Color: warn si menos de 3 horas (180 min), normal si igual o mayor
+    el.style.color = diffMin < 180 ? 'var(--warn)' : 'var(--text-muted)';
+  }
+
+  /** Inicia (o reinicia) el intervalo del temporizador */
+  function startLiveTimer() {
+    if (timerInterval !== null) {
+      clearInterval(timerInterval);
+    }
+    updateLiveTimer();
+    timerInterval = setInterval(updateLiveTimer, 300000); // cada 5 minutos
+  }
 
   /* ─── Carga inicial ──────────────────────────────────────── */
   function loadData() {
@@ -487,6 +560,7 @@
     meals.push({ ts, num });
     saveData();
     renderMeals();
+    startLiveTimer(); // reiniciar temporizador con nueva ingesta
 
     // Feedback visual
     const btn = document.getElementById('btnMeal');
@@ -507,6 +581,7 @@
     saveData();
     renderWater();
     renderMeals();
+    startLiveTimer(); // reiniciar temporizador tras limpiar ingestas
   }
 
   /* ─── Inicializar ────────────────────────────────────────── */
@@ -514,6 +589,7 @@
   renderDate();
   renderWater();
   renderMeals();
+  startLiveTimer(); // iniciar temporizador al cargar
 </script>
 </body>
 </html>
